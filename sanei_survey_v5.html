@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>顧客満足度アンケート</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  min-height:100vh;
+  /* 上下水道・プラント・ベンチャー感：深いティール〜スチールブルー */
+  background: linear-gradient(150deg, #0a2540 0%, #0d3d6e 35%, #0e6b7c 65%, #0e8c7a 100%);
+  font-family: 'Hiragino Kaku Gothic ProN','Hiragino Sans','Noto Sans JP','Meiryo',sans-serif;
+  padding: 1.5rem 1rem;
+}
+
+.sw{max-width:640px;margin:0 auto;}
+
+/* ヘッダー */
+.hd{margin-bottom:1.25rem}
+.hd-company{
+  font-size:13px;color:rgba(180,220,230,0.85);
+  margin-bottom:6px;letter-spacing:.08em;font-weight:500;
+}
+/* やわらかい丸ゴシック体タイトル */
+.hd-title{
+  font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN','Hiragino Sans','Meiryo',sans-serif;
+  font-size:23px;font-weight:700;
+  color:#ffffff;
+  margin-bottom:.5rem;letter-spacing:.04em;
+  text-shadow:0 2px 8px rgba(0,0,0,0.3);
+}
+.hd-meta{display:flex;align-items:center;gap:10px;margin-bottom:.9rem;}
+.hd-time{
+  font-size:12px;color:#a0ddd4;
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.22);
+  border-radius:20px;padding:3px 11px;
+  display:inline-flex;align-items:center;gap:5px;
+}
+
+/* セキュリティ帯 */
+.sec-notice{
+  display:flex;align-items:flex-start;gap:8px;
+  background:rgba(255,255,255,0.10);
+  border:1px solid rgba(255,255,255,0.20);
+  border-radius:8px;padding:8px 12px;
+  margin-bottom:1rem;font-size:11.5px;
+  color:#b8dde8;line-height:1.6;
+}
+.sec-icon{font-size:14px;margin-top:1px;flex-shrink:0;}
+
+/* プログレス */
+.prog-box{
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.22);
+  border-radius:12px;padding:.875rem 1.125rem;
+  backdrop-filter:blur(6px);
+}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.prog-label{font-size:12px;color:#a0c8d8}
+.prog-remain{font-size:12px;font-weight:500;color:#5de8c8}
+.prog-track{height:5px;background:rgba(255,255,255,0.2);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#00c8a0,#00e5c0);border-radius:3px;transition:width .35s ease}
+.prog-dots{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.pdot{height:4px;border-radius:2px;background:rgba(255,255,255,0.2);transition:background .25s;flex:1;min-width:6px}
+.pdot.done{background:#00c8a0}
+.pdot.active{background:#5de8c8}
+
+/* カード */
+.card{
+  background:#ffffff;
+  border:1px solid #cce4ef;
+  border-radius:16px;
+  padding:1.625rem 1.75rem;
+  margin-top:.875rem;
+  min-height:240px;
+  display:flex;flex-direction:column;
+  box-shadow:0 6px 24px rgba(0,0,0,0.15);
+}
+
+.q-text{
+  font-size:15px;font-weight:600;
+  color:#0d2d45;line-height:1.65;
+  margin-bottom:1.25rem;
+}
+
+/* 5段階評価 — 満足が上・ホバー色濃いめ */
+.scale-wrap{display:flex;flex-direction:column;gap:8px;flex:1}
+.scale-opt{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 15px;
+  border:1.5px solid #b8d8ea;
+  border-radius:10px;
+  background:#eaf5fb;
+  cursor:pointer;text-align:left;
+  font-size:13.5px;color:#0d2d45;
+  transition:all .15s;width:100%;
+}
+/* ホバー：しっかり色変わる */
+.scale-opt:hover{background:#b8dff5;border-color:#5aadd4;color:#0a2540;}
+.scale-opt.sel{
+  border-color:#00a080;border-width:2px;
+  background:#c8f0e8;color:#004d38;
+}
+.scale-opt.sel .sc-circle{background:#00a080;border-color:#00a080;}
+.scale-opt.sel .sc-dot{opacity:1}
+.scale-opt.flash{background:#90e4d0;border-color:#00a080;transition:background .05s}
+.sc-circle{
+  width:17px;height:17px;border-radius:50%;
+  border:1.5px solid #8abfd8;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.sc-dot{width:7px;height:7px;border-radius:50%;background:#fff;opacity:0;transition:opacity .15s}
+.sc-val{width:16px;font-size:11px;color:#6a9ab0;flex-shrink:0;text-align:center}
+.scale-opt.sel .sc-val{color:#006650}
+
+/* テキスト入力 */
+.txt-input{
+  width:100%;border:1.5px solid #b8d8ea;
+  border-radius:10px;padding:10px 12px;
+  font-size:14px;color:#0d2d45;
+  background:#eaf5fb;font-family:inherit;
+  line-height:1.5;transition:border .15s;
+}
+.txt-input:focus{outline:none;border-color:#00a080;box-shadow:0 0 0 3px rgba(0,160,128,.15)}
+.txt-input::placeholder{color:#88b5c8}
+textarea.txt-input{resize:vertical;min-height:90px}
+
+/* 基本情報グリッド */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1}
+.info-field{display:flex;flex-direction:column;gap:6px}
+.info-field.full{grid-column:1/-1}
+.field-label{font-size:12px;font-weight:600;color:#2a5a70}
+
+/* ナビ */
+.nav{display:flex;align-items:center;gap:10px;margin-top:1rem}
+.btn-prev{
+  padding:10px 18px;
+  border:1px solid rgba(255,255,255,0.35);
+  border-radius:10px;
+  background:rgba(255,255,255,0.14);
+  backdrop-filter:blur(4px);
+  font-size:13.5px;color:#a8dde8;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.btn-prev:hover:not(:disabled){background:rgba(255,255,255,0.24)}
+.btn-prev:disabled{opacity:.3;cursor:default}
+.btn-next{
+  flex:1;max-width:220px;padding:10px 0;
+  border:none;border-radius:10px;
+  background:linear-gradient(135deg,#00a080,#00c8a0);
+  font-size:13.5px;font-weight:700;color:#fff;
+  cursor:pointer;transition:all .15s;
+  box-shadow:0 3px 10px rgba(0,160,128,.4);
+}
+.btn-next:hover:not(:disabled){background:linear-gradient(135deg,#008060,#009880);}
+.btn-next:disabled{opacity:.35;cursor:default}
+
+/* 送信中 */
+.submitting{text-align:center;padding:2.5rem 1.5rem;background:#fff;border:1px solid #cce4ef;border-radius:16px;margin-top:.875rem;box-shadow:0 6px 24px rgba(0,0,0,0.15);}
+.spinner{width:40px;height:40px;border:3px solid #eaf5fb;border-top-color:#00a080;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 1rem;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* 完了 */
+.thankyou{text-align:center;padding:2.5rem 1.5rem;background:#fff;border:1px solid #cce4ef;border-radius:16px;margin-top:.875rem;box-shadow:0 6px 24px rgba(0,0,0,0.15);}
+.ty-icon{font-size:52px;color:#00a080;margin-bottom:.25rem}
+.ty-title{
+  font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;
+  font-size:18px;font-weight:700;color:#0d2d45;margin:.75rem 0 .5rem
+}
+.ty-body{font-size:13.5px;color:#3a6070;line-height:1.8}
+.ty-err{color:#a32d2d;font-size:13px;margin-top:.75rem}
+</style>
+</head>
+<body>
+<div class="sw">
+  <div class="hd">
+    <div class="hd-company">株式会社***</div>
+    <div class="hd-title">顧客満足度アンケート</div>
+    <div class="hd-meta">
+      <span class="hd-time">🕐 回答所要時間：約1〜2分</span>
+    </div>
+    <div class="sec-notice" id="secNotice">
+      <span class="sec-icon">🔒</span>
+      <span>ご回答内容は暗号化（HTTPS）で安全に送信され、社外に共有されることはありません。</span>
+    </div>
+    <div class="prog-box">
+      <div class="prog-top">
+        <span class="prog-label" id="plabel">ステップ 1 / 10</span>
+        <span class="prog-remain" id="premain">残り 9 ステップ</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="pfill" style="width:10%"></div></div>
+      <div class="prog-dots" id="pdots"></div>
+    </div>
+  </div>
+  <div id="qarea"></div>
+  <div class="nav" id="navbar">
+    <button class="btn-prev" id="btnprev" onclick="goPrev()" disabled>← 前へ</button>
+    <button class="btn-next" id="btnnext" onclick="goNext()">次へ →</button>
+  </div>
+</div>
+
+<script>
+// ▼▼▼ Google Apps Script の WebApp URL をここに貼り付けてください ▼▼▼
+const GAS_URL = 'YOUR_GAS_WEBAPP_URL_HERE';
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
+const SCALE_LABELS=[
+  {v:5,label:'満足'},
+  {v:4,label:'やや満足'},
+  {v:3,label:'普通'},
+  {v:2,label:'やや不満'},
+  {v:1,label:'不満'},
+];
+
+const steps=[
+  {type:'info'},
+  {id:'Q1',req:true, text:'担当者への連絡・相談はしやすかったですか。'},
+  {id:'Q2',req:true, text:'貴社のご要望や仕様を正確に理解し、円滑にコミュニケーションが取れましたか。'},
+  {id:'Q3',req:true, text:'成果物（図書・設計書類）の品質・精度はいかがでしたか。'},
+  {id:'Q4',req:true, text:'納期・工程は遵守されましたか。'},
+  {id:'Q5',req:true, text:'上下水道・プラント設計に関する専門知識・技術レベルはいかがでしたか。'},
+  {id:'Q6',req:true, text:'仕様変更や想定外の事態への対応の柔軟性・スピードはいかがでしたか。'},
+  {id:'Q7',req:true, text:'総合的な満足度と、今後も継続してご依頼いただけそうかをお聞かせください。'},
+  {id:'F1',req:false,text:'良かった点・改善してほしい点など、ご自由にお聞かせください。',free:true},
+  {id:'F2',req:false,text:'3次元CAD・DX対応への期待やご要望があればお聞かせください。',free:true},
+];
+
+const TOTAL=steps.length;
+let cur=0;
+const ans={};
+
+function buildDots(){
+  const c=document.getElementById('pdots');
+  c.innerHTML='';
+  steps.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='pdot'+(i<cur?' done':i===cur?' active':'');
+    c.appendChild(d);
+  });
+}
+
+function updateProg(){
+  const n=cur+1;
+  document.getElementById('plabel').textContent='ステップ '+n+' / '+TOTAL;
+  const rem=TOTAL-n;
+  document.getElementById('premain').textContent=rem>0?'残り '+rem+' ステップ':'最後のステップです';
+  document.getElementById('pfill').style.width=Math.round(n/TOTAL*100)+'%';
+  buildDots();
+  document.getElementById('btnprev').disabled=cur===0;
+  const sn=document.getElementById('secNotice');
+  if(sn) sn.style.display=cur===0?'flex':'none';
+}
+
+function renderStep(){
+  const s=steps[cur];
+  const isLast=cur===TOTAL-1;
+  document.getElementById('btnnext').textContent=isLast?'送信する ✓':'次へ →';
+  updateProg();
+
+  if(s.type==='info'){renderInfo();return;}
+
+  let body='';
+  if(!s.free){
+    body=`<div class="scale-wrap">`+SCALE_LABELS.map(({v,label})=>{
+      const sel=ans[s.id]===v?' sel':'';
+      return `<button class="scale-opt${sel}" onclick="selScale('${s.id}',${v},this)">
+        <div class="sc-circle"><div class="sc-dot"></div></div>
+        <span class="sc-val">${v}</span>
+        <span>${label}</span>
+      </button>`;
+    }).join('')+`</div>`;
+  } else {
+    const val=ans[s.id]||'';
+    body=`<textarea class="txt-input" rows="5" placeholder="こちらにご自由にご記入ください…（任意）" oninput="ans['${s.id}']=this.value">${val}</textarea>`;
+  }
+
+  document.getElementById('qarea').innerHTML=`
+<div class="card">
+  <div class="q-text">${s.text}</div>
+  ${body}
+</div>`;
+  refreshNext();
+}
+
+function renderInfo(){
+  const a=ans.info||{};
+  document.getElementById('qarea').innerHTML=`
+<div class="card">
+  <div class="q-text" style="margin-bottom:1.25rem">はじめに、以下の情報をご入力ください。</div>
+  <div class="info-grid">
+    <div class="info-field full">
+      <label class="field-label">会社名 <span style="color:#a32d2d">*</span></label>
+      <input class="txt-input" type="text" id="f-company" placeholder="例：○○コンサルタント株式会社" value="${a.company||''}" oninput="saveInfo()" />
+    </div>
+    <div class="info-field">
+      <label class="field-label">氏名 <span style="color:#a32d2d">*</span></label>
+      <input class="txt-input" type="text" id="f-name" placeholder="例：山田 太郎" value="${a.name||''}" oninput="saveInfo()" />
+    </div>
+    <div class="info-field">
+      <label class="field-label">弊社担当者名 <span style="color:#a32d2d">*</span></label>
+      <input class="txt-input" type="text" id="f-staff" placeholder="例：鈴木 一郎" value="${a.staff||''}" oninput="saveInfo()" />
+    </div>
+  </div>
+</div>`;
+  refreshNext();
+}
+
+function saveInfo(){
+  ans.info={
+    company:document.getElementById('f-company').value.trim(),
+    name:document.getElementById('f-name').value.trim(),
+    staff:document.getElementById('f-staff').value.trim(),
+  };
+  refreshNext();
+}
+
+function selScale(id,v,btn){
+  ans[id]=v;
+  btn.closest('.scale-wrap').querySelectorAll('.scale-opt').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel','flash');
+  setTimeout(()=>{
+    if(cur<TOTAL-1){cur++;renderStep();}
+    else submit();
+  },220);
+}
+
+function refreshNext(){
+  const s=steps[cur];
+  const btn=document.getElementById('btnnext');
+  if(s.type==='info'){
+    const a=ans.info||{};
+    btn.disabled=!(a.company&&a.name&&a.staff);
+  } else if(s.req&&!s.free){
+    btn.disabled=!ans[s.id];
+  } else {
+    btn.disabled=false;
+  }
+}
+
+function goNext(){
+  const s=steps[cur];
+  if(s.type==='info'){
+    const a=ans.info||{};
+    if(!(a.company&&a.name&&a.staff)){alert('すべての項目をご入力ください。');return;}
+  }
+  if(cur<TOTAL-1){cur++;renderStep();}
+  else submit();
+}
+
+function goPrev(){if(cur>0){cur--;renderStep();}}
+
+async function submit(){
+  document.getElementById('navbar').style.display='none';
+  document.querySelector('.prog-box').style.display='none';
+  document.querySelector('.hd-title').textContent='送信中…';
+  document.getElementById('qarea').innerHTML=`
+<div class="submitting">
+  <div class="spinner"></div>
+  <div style="color:#3a6070;font-size:14px">送信しています。しばらくお待ちください…</div>
+</div>`;
+
+  if(GAS_URL==='YOUR_GAS_WEBAPP_URL_HERE'){
+    setTimeout(()=>showThankyou(),800);
+    return;
+  }
+
+  const payload={
+    timestamp:new Date().toLocaleString('ja-JP'),
+    ...ans.info,
+    ...Object.fromEntries(Object.entries(ans).filter(([k])=>k!=='info'))
+  };
+
+  try{
+    await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    showThankyou();
+  }catch(e){showThankyou(true);}
+}
+
+function showThankyou(isErr=false){
+  document.querySelector('.hd-title').textContent='アンケート完了';
+  document.getElementById('qarea').innerHTML=`
+<div class="thankyou">
+  <div class="ty-icon">✓</div>
+  <div class="ty-title">ご回答いただきありがとうございました</div>
+  <div class="ty-body">いただいた貴重なご意見は、サービスの向上に大切に活用させていただきます。<br>今後とも株式会社***をどうぞよろしくお願いいたします。</div>
+  ${isErr?'<div class="ty-err">※ 送信中にエラーが発生した可能性があります。担当者までご連絡ください。</div>':''}
+</div>`;
+}
+
+renderStep();
+</script>
+</body>
+</html>
